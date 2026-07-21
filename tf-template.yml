@@ -63,7 +63,7 @@ stages:
             inputs:
               provider: azurerm
               command: plan
-              commandOptions: '--var-file=../env/${{ parameters.targetEnvironment }}.tfvars -var subscription_id=$(subscription_id) -out tfplan'
+              commandOptions: '--var-file=../env/${{ parameters.targetEnvironment }}.tfvars -out tfplan'
               environmentServiceNameAzureRM: ${{ parameters.serviceConnectionName }}
               workingDirectory: 'main'
               backendServiceArm: ${{ parameters.serviceConnectionName }}
