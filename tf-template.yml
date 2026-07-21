@@ -30,7 +30,7 @@ stages:
     displayName: "IaC execution for ${{ parameters.targetEnvironment }}"
     environment: ${{ parameters.environmentName }}
     pool:
-      name: ${{ parameters.poolName }}
+      vmImage: ubuntu-latest
     #  demands:
     #  - Agent.Tag -equals LinuxAgent
     strategy:
