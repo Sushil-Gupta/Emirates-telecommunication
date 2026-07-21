@@ -1,0 +1,35 @@
+trigger: none
+
+parameters:
+- name: targetEnvironment
+  type: string
+  default: dev
+  values: 
+  - dev
+  - uat
+  - prod
+- name: executionMode
+  type: string
+  default: plan
+  values:
+  - plan
+  - apply
+  - destroy
+# azure-pipelines.yml
+stages:
+- template: tf-template.yml
+  parameters:
+    targetEnvironment: ${{ parameters.targetEnvironment }}
+    executionMode: ${{ parameters.executionMode }}
+    serviceConnectionName : 'ado-contosso-subsc'
+    environmentName: 'smilesweb-dev'
+    variableGroupName: 'test-mathu-var-grp'
+
+# - ${{ if eq(parameters.targetEnvironment, 'prod') }}:
+#    - template: tf-stage.yml
+#      parameters:
+#        targetEnvironment: ${{ parameters.targetEnvironment }}
+#        executionMode: ${{ parameters.executionMode }}
+#        serviceConnectionName : 'svc-ado-deem_devops'
+#        environmentName: 'Deem-Production'
+#        variableGroupName: 'deem-prod-variables'

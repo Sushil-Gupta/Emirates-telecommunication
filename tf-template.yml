@@ -1,0 +1,109 @@
+# stage-template.yml
+parameters:
+- name: targetEnvironment
+  type: string
+  default: dev
+- name: executionMode
+  type: string
+  default: plan
+- name: poolName
+  type: string
+  default: Default
+- name: terraformVersion
+  type: string
+  default: latest
+- name: serviceConnectionName
+  type: string
+- name: environmentName
+  type: string
+- name: variableGroupName
+  type: string
+
+
+stages:
+- stage: ${{ parameters.targetEnvironment }}_Deployment
+  displayName: 'Run Terraform script for ${{ parameters.targetEnvironment }}'
+  variables:
+  - group: ${{ parameters.variableGroupName }} 
+  jobs:
+  - deployment: DeployApp
+    displayName: "IaC execution for ${{ parameters.targetEnvironment }}"
+    environment: ${{ parameters.environmentName }}
+    pool:
+      name: ${{ parameters.poolName }}
+    #  demands:
+    #  - Agent.Tag -equals LinuxAgent
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+            clean: true
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: ${{ parameters.terraformVersion }}
+          - task: TerraformTask@5
+            displayName: "Run Terraform Init"
+            inputs:
+              provider: azurerm
+              command: init
+              backendServiceArm: ${{ parameters.serviceConnectionName }}
+              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
+              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
+              backendAzureRmContainerName: '$(backendContainer)'
+              backendAzureRmKey: '$(backendKey)'
+              backendAzureRmUseCliFlagsForAuthentication: true
+              workingDirectory: 'main'
+              backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
+
+          - task: TerraformTask@5
+            name: terraformPlan
+            displayName: "Run Terraform Plan"
+            inputs:
+              provider: azurerm
+              command: plan
+              commandOptions: '--var-file=../env/${{ parameters.targetEnvironment }}.tfvars -var subscription_id=$(subscription_id) -out tfplan'
+              environmentServiceNameAzureRM: ${{ parameters.serviceConnectionName }}
+              workingDirectory: 'main'
+              backendServiceArm: ${{ parameters.serviceConnectionName }}
+              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
+              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
+              backendAzureRmContainerName: '$(backendContainer)'
+              backendAzureRmKey: '$(backendKey)'
+              backendAzureRmUseCliFlagsForAuthentication: true
+              backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
+
+          - task: TerraformTask@5
+            displayName: "Run Terraform Apply"
+            condition: eq('${{ parameters.executionMode }}', 'apply')
+            inputs:
+              provider: azurerm
+              command: apply
+              commandOptions: tfplan
+              environmentServiceNameAzureRM: ${{ parameters.serviceConnectionName }}
+              workingDirectory: 'main'
+              backendServiceArm: ${{ parameters.serviceConnectionName }}
+              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
+              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
+              backendAzureRmContainerName: '$(backendContainer)'
+              backendAzureRmKey: '$(backendKey)'
+              backendAzureRmUseCliFlagsForAuthentication: true
+              backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
+
+          - task: TerraformTask@5
+            displayName: "Run Terraform Destroy Plan"
+            condition: eq('${{ parameters.executionMode }}', 'destroy')
+            inputs:
+              provider: azurerm
+              command: plan
+              commandOptions: '--var-file=../env/${{ parameters.targetEnvironment }}.tfvars -destroy'
+              environmentServiceNameAzureRM: ${{ parameters.serviceConnectionName }}
+              workingDirectory: 'main'
+              backendServiceArm: ${{ parameters.serviceConnectionName }}
+              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
+              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
+              backendAzureRmContainerName: '$(backendContainer)'
+              backendAzureRmKey: '$(backendKey)'
+              backendAzureRmUseCliFlagsForAuthentication: true
+              backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
