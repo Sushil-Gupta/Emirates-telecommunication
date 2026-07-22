@@ -26,7 +26,7 @@ stages:
   variables:
   - group: ${{ parameters.variableGroupName }} 
   jobs:
-  - deployment: DeployApp
+  - deployment: DeployInfra
     displayName: "IaC execution for ${{ parameters.targetEnvironment }}"
     environment: ${{ parameters.environmentName }}
     pool:
