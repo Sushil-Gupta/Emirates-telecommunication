@@ -30,7 +30,7 @@ stages:
     displayName: "IaC execution for ${{ parameters.targetEnvironment }}"
     environment: ${{ parameters.environmentName }}
     pool:
-      vmImage: ubuntu-latest
+      vmImage: ubuntu-latest # Microsoft hosted agent
     #  demands:
     #  - Agent.Tag -equals LinuxAgent
     strategy:
@@ -91,19 +91,3 @@ stages:
               backendAzureRmUseCliFlagsForAuthentication: true
               backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
 
-          - task: TerraformTask@5
-            displayName: "Run Terraform Destroy Plan"
-            condition: eq('${{ parameters.executionMode }}', 'destroy')
-            inputs:
-              provider: azurerm
-              command: plan
-              commandOptions: '--var-file=../env/${{ parameters.targetEnvironment }}.tfvars -destroy'
-              environmentServiceNameAzureRM: ${{ parameters.serviceConnectionName }}
-              workingDirectory: 'main'
-              backendServiceArm: ${{ parameters.serviceConnectionName }}
-              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
-              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
-              backendAzureRmContainerName: '$(backendContainer)'
-              backendAzureRmKey: '$(backendKey)'
-              backendAzureRmUseCliFlagsForAuthentication: true
-              backendAzureRmOverrideSubscriptionID: '$(backendAzureRmOverrideSubscriptionID)'
