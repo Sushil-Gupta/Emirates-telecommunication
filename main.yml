@@ -19,11 +19,11 @@ parameters:
 stages:
 - template: tf-template.yml
   parameters:
-    targetEnvironment: ${{ parameters.targetEnvironment }}
-    executionMode: ${{ parameters.executionMode }}
-    serviceConnectionName : 'ado-contosso-subsc'
-    environmentName: 'smilesweb-dev'
-    variableGroupName: 'test-mathu-var-grp'
+    targetEnvironment: ${{ parameters.targetEnvironment }} # target environment for deployment (dev, uat, prod)
+    executionMode: ${{ parameters.executionMode }} # plan, apply, destroy
+    serviceConnectionName : 'ado-contosso-subsc' # service connection name in Azure DevOps for connecting to Azure subscription
+    environmentName: 'smilesweb-dev' # environment name in Azure DevOps for deployment and approval gates
+    variableGroupName: 'test-mathu-var-grp' # variable group name in Azure DevOps for storing secrets and variables
 
 # - ${{ if eq(parameters.targetEnvironment, 'prod') }}:
 #    - template: tf-stage.yml
